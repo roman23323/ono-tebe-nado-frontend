@@ -20,7 +20,11 @@ export class AppData extends Model<IAppData> {
                 title: item.title,
                 about: item.about,
                 image: item.image,
+                status: item.status,
+                datetime: item.datetime
             }
         });
+        console.log(`Теперь в каталоге: `, this._catalog);
+        this.events.emit<{items: ILotItem[]}>('appdata:changed:catalog', {items: this._catalog});
     }
 }

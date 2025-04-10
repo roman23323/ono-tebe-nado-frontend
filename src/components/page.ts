@@ -3,7 +3,7 @@ import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 
 interface IPage {
-    catalog: HTMLElement
+    catalog: HTMLElement[]
 }
 
 export class Page extends Component<IPage> {
@@ -16,10 +16,10 @@ export class Page extends Component<IPage> {
         super(container);
         this._catalog = ensureElement('.catalog__items');
         this._basketButton = ensureElement<HTMLButtonElement>('.header__basket');
-        this._basketCounter = ensureElement('header__basket-counter', this._basketButton);
+        this._basketCounter = ensureElement('.header__basket-counter', this._basketButton);
     }
 
-    set catalog(catalog: HTMLElement) {
-        this._catalog = catalog;
+    set catalog(items: HTMLElement[]) {
+        this._catalog.replaceChildren(...items);
     }
 }
