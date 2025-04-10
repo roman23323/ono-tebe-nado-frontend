@@ -2,11 +2,11 @@ import { Api, ApiListResponse } from './base/api';
 import {IOrder, IOrderResult, ILot, LotUpdate, IBid} from "../types";
 
 export interface IAuctionAPI {
-    getLotList: () => Promise<ILot[]>;
-    getLotItem: (id: string) => Promise<ILot>;
-    getLotUpdate: (id: string) => Promise<LotUpdate>;
-    placeBid(id: string, bid: IBid): Promise<LotUpdate>;
-    orderLots: (order: IOrder) => Promise<IOrderResult>;
+    getLotList: () => Promise<ILot[]>; // Без description (большого описания)
+    getLotItem: (id: string) => Promise<ILot>; // С описанием и историей
+    getLotUpdate: (id: string) => Promise<LotUpdate>; // История и последняя цена
+    placeBid(id: string, bid: IBid): Promise<LotUpdate>; // То же
+    orderLots: (order: IOrder) => Promise<IOrderResult>; // Отправка заказа на лот
 }
 
 export class AuctionAPI extends Api implements IAuctionAPI {

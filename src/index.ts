@@ -3,6 +3,9 @@ import './scss/styles.scss';
 import {AuctionAPI} from "./components/AuctionAPI";
 import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
+import { AppData } from './components/AppData';
+import { cloneTemplate, ensureElement } from './utils/utils';
+import { Page } from './components/page';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -13,13 +16,13 @@ events.onAll(({ eventName, data }) => {
 })
 
 // Все шаблоны
-
+const cardTemplate = cloneTemplate('#card');
 
 // Модель данных приложения
-
+const appData = new AppData({}, events);
 
 // Глобальные контейнеры
-
+const page = new Page(ensureElement('.page'), {onClick: () => console.log('нажата корзина')});
 
 // Переиспользуемые части интерфейса
 
@@ -32,6 +35,7 @@ events.onAll(({ eventName, data }) => {
 api.getLotList()
     .then(result => {
         // вместо лога поместите данные в модель
+        appData.catalog = result;
         console.log(result);
     })
     .catch(err => {

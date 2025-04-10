@@ -38,3 +38,7 @@ export interface IBid {
 export interface IOrderResult {
     id: string;
 }
+
+export interface Action {
+    onClick: () => void
+}
