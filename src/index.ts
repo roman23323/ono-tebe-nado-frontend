@@ -5,9 +5,12 @@ import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
 import { AppData } from './components/AppData';
 import { cloneTemplate, ensureElement } from './utils/utils';
-import { Page } from './components/page';
+import { Page } from './components/Page';
 import { ILotItem } from './types';
-import { Card } from './components/card';
+import { Card } from './components/Card';
+import { Modal } from './components/common/Modal';
+import { Preview } from './components/Preview';
+import { Auction } from './components/Auction';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -19,27 +22,65 @@ events.onAll(({ eventName, data }) => {
 
 // Все шаблоны
 const cardTemplate = ensureElement<HTMLTemplateElement>('#card');
-console.log(cardTemplate);
+const previewTemplate = ensureElement<HTMLTemplateElement>('#preview');
+const auctionTemplate = ensureElement<HTMLTemplateElement>('#auction');
 
 // Модель данных приложения
 const appData = new AppData({}, events);
 
 // Глобальные контейнеры
 const page = new Page(ensureElement('.page'), {onClick: () => console.log('нажата корзина')});
+const modalContainer = ensureElement('#modal-container'); // Пустое модальное окно
+
+
+// const testModal = new Modal(modalContainer, events)
+// testModal.render({
+//     content: cloneTemplate(previewTemplate)
+// });
+// testModal.open();
 
 // Переиспользуемые части интерфейса
 
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
+
+interface CardClick {
+    id: string
+}
+
 events.on<{items: ILotItem[]}>('appdata:changed:catalog', catalog => {
     const catalogItems = catalog.items.map(item => {
-        return new Card(cloneTemplate(cardTemplate), {onClick: () => console.log(`Нажат айтем ${item.title}`)}).render(item);
+        return new Card(cloneTemplate(cardTemplate), {
+            onClick: () => events.emit<CardClick>('card:click', {id: item.id})
+        }).render(item);
     });
     page.render({
         catalog: catalogItems
     });
 });
+
+events.on<CardClick>('card:click', event => {
+    api.getLotItem(event.id)
+        .then(result => {
+            const itemData = result;
+            const previewModal = new Modal(modalContainer, events);
+            const status = new Auction(cloneTemplate(auctionTemplate));
+            // TODO: дописать рендер превью
+            previewModal.render({
+                content: new Preview(cloneTemplate(previewTemplate)).render({
+                    title: itemData.title,
+                    description: itemData.description,
+                    image: itemData.image,
+                    status: 
+                })
+            });
+    });
+});
+
+events.on('modal:open', () => {
+    // TODO: заблокировать прокрутку страницы
+})
 
 // Получаем лоты с сервера
 api.getLotList()
