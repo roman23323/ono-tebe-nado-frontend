@@ -1,35 +1,47 @@
-import { formButtonAction, LotStatus } from "../types";
+import { LotStatus } from "../types";
 import { createElement, dayjs, ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
+import { IEvents } from "./base/events";
 
 interface IAuction {
+    id: string,
     datetime: string,
     price: number,
     status: LotStatus,
     history: number[]
-    // TODO: дописать интерфейс
+}
+
+export interface IBidSubmit {
+    id: string,
+    bid: number
 }
 
 export class Auction extends Component<IAuction> {
+    protected _currentPrice: number;
+    protected _id: string;
+
     protected _timer: HTMLElement;
     protected _text: HTMLElement;
     protected _bidInput: HTMLInputElement;
-    protected _button: HTMLButtonElement;
+    protected _submit: HTMLButtonElement;
     protected _bidHistory: HTMLUListElement;
-    protected _currentPrice: number;
 
-    // TODO: дописать сеттеры
-
-    constructor(protected container: HTMLElement, action: formButtonAction) {
+    constructor(protected container: HTMLElement, events: IEvents) {
         super(container);
     
         this._timer = ensureElement<HTMLElement>('.lot__auction-timer', container);
         this._text = ensureElement<HTMLElement>('.lot__auction-text', container);
         this._bidInput = ensureElement<HTMLInputElement>('.form__input', container);
-        this._button = ensureElement<HTMLButtonElement>('.button', container);
+        this._submit = ensureElement<HTMLButtonElement>('.button', container);
         this._bidHistory = ensureElement<HTMLUListElement>('.lot__history-bids', container);
         
-        this._button.addEventListener('click', action.onClick);
+        this._submit.addEventListener('click', event => {
+            event.preventDefault();
+            events.emit<IBidSubmit>('bid:submit', {
+                id: this._id,
+                bid: Number(this._bidInput.value)
+            })
+        });
     }
     
     set datetime(datetime: string) {
@@ -84,7 +96,6 @@ export class Auction extends Component<IAuction> {
     }
 
     set history(history: number[]) {
-        console.log("Заполнение ствок");
         const bids = history.map(bid => {
             return createElement('li', {
                 className: 'lot__history-item',
@@ -92,5 +103,9 @@ export class Auction extends Component<IAuction> {
             });
         });
         this._bidHistory.replaceChildren(...bids);
+    }
+
+    set id(id: string) {
+        this._id = id;
     }
 }

@@ -10,7 +10,7 @@ import { ILotItem } from './types';
 import { Card } from './components/Card';
 import { Modal } from './components/common/Modal';
 import { Preview } from './components/Preview';
-import { Auction } from './components/Auction';
+import { Auction, IBidSubmit } from './components/Auction';
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -45,14 +45,14 @@ const modalContainer = ensureElement('#modal-container'); // Пустое мод
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
 
-interface CardClick {
+interface ICardClick {
     id: string
 }
 
 events.on<{items: ILotItem[]}>('appdata:changed:catalog', catalog => {
     const catalogItems = catalog.items.map(item => {
         return new Card(cloneTemplate(cardTemplate), {
-            onClick: () => events.emit<CardClick>('card:click', {id: item.id})
+            onClick: () => events.emit<ICardClick>('card:click', {id: item.id})
         }).render(item);
     });
     page.render({
@@ -60,23 +60,19 @@ events.on<{items: ILotItem[]}>('appdata:changed:catalog', catalog => {
     });
 });
 
-events.on<CardClick>('card:click', event => {
+events.on<ICardClick>('card:click', event => {
     api.getLotItem(event.id)
         .then(itemData => {
+            console.log('Данные о лоте: ', itemData);
             const previewModal = new Modal(modalContainer, events);
-            const status = new Auction(cloneTemplate(auctionTemplate), {
-                onClick: (event) => {
-                event.preventDefault()
-                console.log('добавление ставки в превью')
-                }
-            });
-            // TODO: дописать рендер превью
+            const status = new Auction(cloneTemplate(auctionTemplate), events);
             previewModal.render({
                 content: new Preview(cloneTemplate(previewTemplate)).render({
                     title: itemData.title,
                     description: itemData.description,
                     image: itemData.image,
                     status: status.render({
+                        id: itemData.id,
                         datetime: itemData.datetime,
                         price: itemData.price,
                         status: itemData.status,
@@ -86,6 +82,16 @@ events.on<CardClick>('card:click', event => {
             });
     });
 });
+
+events.on('bid:submit', (bidInfo: IBidSubmit) => {
+    api.placeBid(bidInfo.id, {price: bidInfo.bid})
+        .then(lot => {
+            console.log('lot update received: ', lot);
+            const updatedItem = appData.catalog.find(lot => lot.id === bidInfo.id);
+            updatedItem.
+            // Надо обновить каталог
+        });
+})
 
 events.on('modal:open', () => {
     // TODO: заблокировать прокрутку страницы
