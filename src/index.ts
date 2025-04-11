@@ -62,8 +62,7 @@ events.on<{items: ILotItem[]}>('appdata:changed:catalog', catalog => {
 
 events.on<CardClick>('card:click', event => {
     api.getLotItem(event.id)
-        .then(result => {
-            const itemData = result;
+        .then(itemData => {
             const previewModal = new Modal(modalContainer, events);
             const status = new Auction(cloneTemplate(auctionTemplate), {
                 onClick: (event) => {
@@ -80,7 +79,8 @@ events.on<CardClick>('card:click', event => {
                     status: status.render({
                         datetime: itemData.datetime,
                         price: itemData.price,
-                        status: itemData.status
+                        status: itemData.status,
+                        history: itemData.history
                     })
                 })
             });

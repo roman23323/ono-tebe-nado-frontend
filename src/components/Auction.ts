@@ -1,11 +1,12 @@
-import { Action, formButtonAction, LotStatus } from "../types";
-import { dayjs, ensureElement } from "../utils/utils";
+import { formButtonAction, LotStatus } from "../types";
+import { createElement, dayjs, ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 
 interface IAuction {
     datetime: string,
     price: number,
-    status: LotStatus
+    status: LotStatus,
+    history: number[]
     // TODO: дописать интерфейс
 }
 
@@ -74,5 +75,22 @@ export class Auction extends Component<IAuction> {
             }
         }
         this.setText(this._text, text);
+
+        if (status != 'active') {
+            ['.lot__bid', '.lot__history'].map(elem => {
+                ensureElement(elem, this.container).style.display = 'none';
+            });
+        }
+    }
+
+    set history(history: number[]) {
+        console.log("Заполнение ствок");
+        const bids = history.map(bid => {
+            return createElement('li', {
+                className: 'lot__history-item',
+                textContent: String(bid)
+            });
+        });
+        this._bidHistory.replaceChildren(...bids);
     }
 }

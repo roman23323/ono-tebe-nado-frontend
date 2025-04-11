@@ -1,4 +1,4 @@
-import { ensureElement } from "../utils/utils";
+import { createElement, ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 
 interface IPreview {
@@ -27,9 +27,14 @@ export class Preview extends Component<IPreview> {
         this.setText(this._title, title);
     }
 
-    set description(description: string) {
-        // TODO: добавить поддержку массива строк описания
-        this.setText(this._description, description);
+    set description(value: string) {
+        const paragraphs = value.split('\n');
+    
+        const elements = paragraphs.map(paragraph => {
+            return createElement('p', { textContent: paragraph });
+        });
+    
+        this._description.replaceChildren(...elements);
     }
 
     set image(image: string) {
