@@ -65,14 +65,23 @@ events.on<CardClick>('card:click', event => {
         .then(result => {
             const itemData = result;
             const previewModal = new Modal(modalContainer, events);
-            const status = new Auction(cloneTemplate(auctionTemplate));
+            const status = new Auction(cloneTemplate(auctionTemplate), {
+                onClick: (event) => {
+                event.preventDefault()
+                console.log('добавление ставки в превью')
+                }
+            });
             // TODO: дописать рендер превью
             previewModal.render({
                 content: new Preview(cloneTemplate(previewTemplate)).render({
                     title: itemData.title,
                     description: itemData.description,
                     image: itemData.image,
-                    status: 
+                    status: status.render({
+                        datetime: itemData.datetime,
+                        price: itemData.price,
+                        status: itemData.status
+                    })
                 })
             });
     });

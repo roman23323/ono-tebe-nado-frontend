@@ -42,3 +42,7 @@ export interface IOrderResult {
 export interface Action {
     onClick: () => void
 }
+
+export interface formButtonAction {
+    onClick: (event: SubmitEvent) => void
+}
